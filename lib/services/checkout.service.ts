@@ -35,12 +35,12 @@ export class CheckoutService {
       const cart = cartResponse.data;
 
       // Validate cart is not empty
-      if (cart.items.length === 0) {
+      if (!cart || !cart.items || cart.items.length === 0) {
         return {
           success: false,
           error: {
             code: EC.INVALID_REQUEST,
-            message: 'Cannot checkout with an empty cart',
+            message: `Cannot checkout with an empty cart. Cart has ${cart?.items?.length || 0} items.`,
           },
         };
       }
@@ -118,7 +118,8 @@ export class CheckoutService {
       orders.set(orderId, order);
 
       // Generate new discount if eligible (checks orders.size after storing)
-      DiscountService.generateDiscountIfEligible();
+      const discountGenerationResult = DiscountService.generateDiscountIfEligible();
+      const generatedDiscount = discountGenerationResult.success ? discountGenerationResult.data : null;
 
       const checkoutResponse: CheckoutResponse = {
         orderId,
@@ -129,6 +130,10 @@ export class CheckoutService {
 
       if (discountAmount > 0) {
         checkoutResponse.discountAmount = discountAmount;
+      }
+
+      if (generatedDiscount && !generatedDiscount.isUsed) {
+        checkoutResponse.generatedDiscountCode = generatedDiscount.code;
       }
 
       // Clear cart after successful checkout

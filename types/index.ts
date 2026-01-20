@@ -49,6 +49,7 @@ export interface CheckoutResponse {
   orderId: string;
   total: number;
   discountAmount?: number;
+  generatedDiscountCode?: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
   createdAt: string;
 }
