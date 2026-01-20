@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
       paymentMethod: {
         type: 'card' | 'paypal' | 'apple_pay';
       };
+      discountCode?: string;
     }>(request);
 
     if (!bodyResult.success) {

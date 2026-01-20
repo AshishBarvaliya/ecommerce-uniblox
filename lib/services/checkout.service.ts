@@ -1,5 +1,6 @@
 import { products, orders } from '@/lib/store';
 import { CartService } from './cart.service';
+import { DiscountService } from './discount.service';
 import type { CheckoutRequest, CheckoutResponse, ApiResponse, Order } from '@/types';
 import { ErrorCode as EC } from '@/types';
 
@@ -58,8 +59,28 @@ export class CheckoutService {
         }
       }
 
-      // Process payment (simulated)
-      const paymentResult = await this.processPayment(cart.total);
+      // Validate and apply discount code if provided
+      let discountAmount = 0;
+      let finalTotal = cart.total;
+      
+      if (request.discountCode) {
+        const discountValidation = DiscountService.validateDiscountCode(
+          request.discountCode
+        );
+        if (!discountValidation.success) {
+          return {
+            success: false,
+            error: discountValidation.error,
+          };
+        }
+
+        const discount = discountValidation.data!;
+        discountAmount = Math.round((cart.total * discount.percentage) / 100);
+        finalTotal = cart.total - discountAmount;
+      }
+
+      // Process payment (simulated) - use final total after discount
+      const paymentResult = await this.processPayment(finalTotal);
       if (!paymentResult.success) {
         return {
           success: false,
@@ -78,7 +99,7 @@ export class CheckoutService {
         id: orderId,
         userId: request.userId,
         items: [...cart.items],
-        total: cart.total,
+        total: finalTotal,
         status: 'processing',
         paymentMethod: request.paymentMethod,
         transactionId: paymentResult.transactionId,
@@ -86,15 +107,29 @@ export class CheckoutService {
         updatedAt: now.toISOString(),
       };
 
+      // Add discount info to order if discount was used
+      if (request.discountCode && discountAmount > 0) {
+        order.discountCode = request.discountCode;
+        order.discountAmount = discountAmount;
+        DiscountService.markDiscountAsUsed();
+      }
+
       // Store order
       orders.set(orderId, order);
 
+      // Generate new discount if eligible (checks orders.size after storing)
+      DiscountService.generateDiscountIfEligible();
+
       const checkoutResponse: CheckoutResponse = {
         orderId,
-        total: cart.total,
+        total: finalTotal,
         status: 'processing',
         createdAt: now.toISOString(),
       };
+
+      if (discountAmount > 0) {
+        checkoutResponse.discountAmount = discountAmount;
+      }
 
       // Clear cart after successful checkout
       CartService.clearCart(request.userId);

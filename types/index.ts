@@ -27,17 +27,28 @@ export interface Cart {
   updatedAt: string;
 }
 
+// Discount types
+export interface Discount {
+  code: string;
+  percentage: 10;
+  isUsed: boolean;
+  createdAt: string;
+  usedAt?: string;
+}
+
 // Checkout types
 export interface CheckoutRequest {
   userId: string;
   paymentMethod: {
     type: 'card' | 'paypal' | 'apple_pay';
   };
+  discountCode?: string;
 }
 
 export interface CheckoutResponse {
   orderId: string;
   total: number;
+  discountAmount?: number;
   status: 'pending' | 'processing' | 'completed' | 'failed';
   createdAt: string;
 }
@@ -48,6 +59,8 @@ export interface Order {
   userId: string;
   items: CartItem[];
   total: number;
+  discountCode?: string;
+  discountAmount?: number;
   status: 'pending' | 'processing' | 'completed' | 'failed';
   paymentMethod: {
     type: 'card' | 'paypal' | 'apple_pay';
@@ -77,4 +90,7 @@ export enum ErrorCode {
   INVALID_REQUEST = 'INVALID_REQUEST',
   CHECKOUT_FAILED = 'CHECKOUT_FAILED',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
+  DISCOUNT_NOT_FOUND = 'DISCOUNT_NOT_FOUND',
+  DISCOUNT_ALREADY_USED = 'DISCOUNT_ALREADY_USED',
+  INVALID_DISCOUNT_CODE = 'INVALID_DISCOUNT_CODE',
 }
