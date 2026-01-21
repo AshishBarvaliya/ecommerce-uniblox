@@ -3,6 +3,14 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { ShoppingCart, X, Plus, Minus, Tag } from 'lucide-react';
 import type { CartItem, Product } from '@/types';
 
@@ -18,6 +26,7 @@ interface CartSummaryProps {
 export function CartSummary({ cart, total, onCheckout, onRemove, onUpdateQuantity, isLoading }: CartSummaryProps) {
   const [products, setProducts] = useState<Map<string, Product>>(new Map());
   const [discountCode, setDiscountCode] = useState<string>('');
+  const [showEmptyCartModal, setShowEmptyCartModal] = useState(false);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -40,7 +49,7 @@ export function CartSummary({ cart, total, onCheckout, onRemove, onUpdateQuantit
 
   const handleCheckout = () => {
     if (!cart || !cart.items || cart.items.length === 0) {
-      alert('Your cart is empty. Please add items before checkout.');
+      setShowEmptyCartModal(true);
       return;
     }
     onCheckout(discountCode.trim() || undefined, total);
@@ -49,7 +58,22 @@ export function CartSummary({ cart, total, onCheckout, onRemove, onUpdateQuantit
   const items = cart?.items || [];
 
   return (
-    <Card className="sticky top-4 bg-white border-2 border-gray-200 shadow-lg max-h-[calc(100vh-2rem)] flex flex-col">
+    <>
+      <Dialog open={showEmptyCartModal} onOpenChange={setShowEmptyCartModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Empty Cart</DialogTitle>
+            <DialogDescription>
+              Your cart is empty. Please add items before checkout.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setShowEmptyCartModal(false)}>OK</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Card className="sticky top-4 bg-white border-2 border-gray-200 shadow-lg max-h-[calc(100vh-2rem)] flex flex-col">
       <CardHeader className="pb-2 px-4 pt-4 bg-gradient-to-r from-blue-50 to-transparent rounded-t-lg flex-shrink-0">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold text-gray-900">
           <ShoppingCart className="h-4 w-4 text-primary" />
@@ -158,5 +182,6 @@ export function CartSummary({ cart, total, onCheckout, onRemove, onUpdateQuantit
         )}
       </CardContent>
     </Card>
+    </>
   );
 }

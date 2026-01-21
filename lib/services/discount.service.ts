@@ -55,7 +55,6 @@ export class DiscountService {
 
   /**
    * Validate a discount code
-   * Returns the discount if valid and unused
    */
   public static validateDiscountCode(code: string): ApiResponse<Discount> {
     try {
@@ -179,6 +178,39 @@ export class DiscountService {
   public static getCurrentDiscount(): Discount | null {
     const currentDiscount = getCurrentDiscount();
     return currentDiscount && !currentDiscount.isUsed ? currentDiscount : null;
+  }
+
+  /**
+   * Manually generate a discount code (admin function)
+   */
+  public static generateDiscountManually(): ApiResponse<Discount> {
+    try {
+      // Generate new discount code (replaces any existing discount)
+      const code = this.generateDiscountCode();
+      const now = new Date().toISOString();
+
+      const discount: Discount = {
+        code,
+        percentage: 10,
+        isUsed: false,
+        createdAt: now,
+      };
+
+      setCurrentDiscount(discount);
+
+      return {
+        success: true,
+        data: discount,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          code: EC.INTERNAL_ERROR,
+          message: 'Failed to generate discount code',
+        },
+      };
+    }
   }
 
   /**

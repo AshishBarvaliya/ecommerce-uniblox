@@ -3,7 +3,17 @@
 import { useEffect, useState } from 'react';
 import { ProductCard } from '@/components/ProductCard';
 import { CartSummary } from '@/components/CartSummary';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/useCart';
+import { CheckCircle2, XCircle, Gift } from 'lucide-react';
 import type { Product } from '@/types';
 
 export default function Home() {
@@ -11,6 +21,21 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutModal, setCheckoutModal] = useState<{
+    open: boolean;
+    type: 'success' | 'error';
+    title: string;
+    message: string;
+    orderId?: string;
+    total?: number;
+    discountAmount?: number;
+    generatedDiscountCode?: string;
+  }>({
+    open: false,
+    type: 'success',
+    title: '',
+    message: '',
+  });
   const { cart, addToCart, removeFromCart, updateQuantity, checkout, itemCount, total } = useCart();
 
   useEffect(() => {
@@ -54,19 +79,23 @@ export default function Home() {
     setCheckoutLoading(false);
     if (result.success && result.data) {
       const response = result.data;
-      let message = `Order placed successfully!\nOrder ID: ${response.orderId}\nTotal: $${response.total || finalTotal || total}`;
-      
-      if (response.discountAmount) {
-        message += `\nDiscount Applied: -$${response.discountAmount}`;
-      }
-      
-      if (response.generatedDiscountCode) {
-        message += `\n\n🎉 New Discount Code Generated!\nCode: ${response.generatedDiscountCode}\nSave this code for your next purchase!`;
-      }
-      
-      alert(message);
+      setCheckoutModal({
+        open: true,
+        type: 'success',
+        title: 'Order Placed Successfully!',
+        message: 'Your order has been placed successfully.',
+        orderId: response.orderId,
+        total: response.total || finalTotal || total,
+        discountAmount: response.discountAmount,
+        generatedDiscountCode: response.generatedDiscountCode,
+      });
     } else {
-      alert(`Checkout failed: ${result.error || 'Unknown error'}`);
+      setCheckoutModal({
+        open: true,
+        type: 'error',
+        title: 'Checkout Failed',
+        message: result.error || 'Unknown error occurred',
+      });
     }
   };
 
@@ -80,6 +109,76 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Dialog open={checkoutModal.open} onOpenChange={(open) => setCheckoutModal({ ...checkoutModal, open })}>
+        <DialogContent className="max-w-md bg-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              {checkoutModal.type === 'success' ? (
+                <CheckCircle2 className="h-6 w-6 text-green-600" />
+              ) : (
+                <XCircle className="h-6 w-6 text-red-600" />
+              )}
+              {checkoutModal.title}
+            </DialogTitle>
+            {checkoutModal.type === 'success' ? (
+              <DialogDescription className="text-base text-gray-600">
+                {checkoutModal.message}
+              </DialogDescription>
+            ) : null}
+          </DialogHeader>
+          
+          {checkoutModal.type === 'success' ? (
+            <div className="space-y-4 py-4">
+              <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                <div className="flex justify-between items-center pb-2 border-b border-gray-200">
+                  <span className="text-sm font-medium text-gray-600">Order ID</span>
+                  <span className="text-sm font-mono font-semibold text-gray-900">{checkoutModal.orderId}</span>
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b border-gray-200">
+                  <span className="text-sm font-medium text-gray-600">Total</span>
+                  <span className="text-lg font-bold text-gray-900">${checkoutModal.total?.toFixed(2)}</span>
+                </div>
+                {checkoutModal.discountAmount && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-600">Discount Applied</span>
+                    <span className="text-sm font-semibold text-green-600">-${checkoutModal.discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
+              
+              {checkoutModal.generatedDiscountCode && (
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Gift className="h-5 w-5 text-blue-600" />
+                    <p className="font-semibold text-blue-900">New Discount Code Generated!</p>
+                  </div>
+                  <p className="text-sm text-blue-700 mb-3">Save this code for your next purchase:</p>
+                  <div className="bg-white border-2 border-blue-300 rounded-md p-3 shadow-sm">
+                    <p className="text-2xl font-bold text-blue-700 text-center tracking-wider">
+                      {checkoutModal.generatedDiscountCode}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="py-4">
+              <p className="text-red-600 font-medium">{checkoutModal.message}</p>
+            </div>
+          )}
+          
+          <DialogFooter className="mt-4">
+            <Button 
+              onClick={() => setCheckoutModal({ ...checkoutModal, open: false })}
+              className={checkoutModal.type === 'success' ? 'w-full bg-blue-600 hover:bg-blue-700 text-white' : ''}
+              size="lg"
+            >
+              {checkoutModal.type === 'success' ? 'Continue Shopping' : 'Close'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1 text-gray-900">Products</h1>
