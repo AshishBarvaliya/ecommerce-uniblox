@@ -14,13 +14,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/useCart';
 import { CheckCircle2, XCircle, Gift } from 'lucide-react';
-import type { Product } from '@/types';
+import type { Product, Discount } from '@/types';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [currentDiscount, setCurrentDiscount] = useState<Discount | null>(null);
   const [checkoutModal, setCheckoutModal] = useState<{
     open: boolean;
     type: 'success' | 'error';
@@ -55,6 +57,24 @@ export default function Home() {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    async function fetchDiscount() {
+      try {
+        const response = await fetch('/api/discount');
+        const data = await response.json();
+        if (data.success && data.data) {
+          setCurrentDiscount(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch discount:', error);
+      }
+    }
+    fetchDiscount();
+    // Refresh discount after checkout
+    const interval = setInterval(fetchDiscount, 5000); // Check every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   const handleAddToCart = async (productId: string) => {
     setAddingToCart(productId);
     await addToCart(productId);
@@ -62,14 +82,22 @@ export default function Home() {
   };
 
   const handleRemoveFromCart = async (productId: string) => {
-    await removeFromCart(productId);
+    try {
+      await removeFromCart(productId);
+    } catch (error) {
+      console.error('Failed to remove from cart:', error);
+    }
   };
 
   const handleUpdateQuantity = async (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      await removeFromCart(productId);
-    } else {
-      await updateQuantity(productId, quantity);
+    try {
+      if (quantity <= 0) {
+        await removeFromCart(productId);
+      } else {
+        await updateQuantity(productId, quantity);
+      }
+    } catch (error) {
+      console.error('Failed to update quantity:', error);
     }
   };
 
@@ -89,6 +117,14 @@ export default function Home() {
         discountAmount: response.discountAmount,
         generatedDiscountCode: response.generatedDiscountCode,
       });
+      // Refresh discount code after checkout
+      const discountResponse = await fetch('/api/discount');
+      const discountData = await discountResponse.json();
+      if (discountData.success && discountData.data) {
+        setCurrentDiscount(discountData.data);
+      } else {
+        setCurrentDiscount(null);
+      }
     } else {
       setCheckoutModal({
         open: true,
@@ -180,6 +216,28 @@ export default function Home() {
       </Dialog>
 
       <div className="container mx-auto px-4 py-6 max-w-7xl">
+        {/* Current Discount Code Banner */}
+        {currentDiscount && (
+          <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Gift className="h-6 w-6 text-blue-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-blue-900">Active Discount Code Available!</p>
+                    <p className="text-xs text-blue-700">Use this code at checkout to save {currentDiscount.percentage}%</p>
+                  </div>
+                </div>
+                <div className="bg-white border-2 border-blue-300 rounded-md px-4 py-2 shadow-sm">
+                  <p className="text-xl font-bold text-blue-700 tracking-wider">
+                    {currentDiscount.code}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1 text-gray-900">Products</h1>
           <p className="text-xs text-gray-600">Browse and add items to your cart</p>

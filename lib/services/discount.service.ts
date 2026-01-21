@@ -9,16 +9,17 @@ import { ErrorCode as EC } from '@/types';
 // Discount Service - handles discount code generation and validation
 export class DiscountService {
   // Configuration: Every Nth order gets a discount code
-  private static readonly N = 3; 
+  private static readonly N = 5; 
 
   public static generateDiscountIfEligible(): ApiResponse<Discount | null> {
     try {
       // Count total orders from the orders Map
       const orderCount = orders.size;
-      const currentDiscount = getCurrentDiscount();
 
       // Check if order count is a multiple of N (and not zero)
       if (orderCount === 0 || orderCount % this.N !== 0) {
+        // Return current discount if it exists and hasn't expired
+        const currentDiscount = this.getCurrentDiscount();
         return {
           success: true,
           data: currentDiscount,
@@ -34,6 +35,7 @@ export class DiscountService {
         percentage: 10,
         isUsed: false,
         createdAt: now,
+        generatedAtOrder: orderCount,
       };
 
       setCurrentDiscount(discount);
@@ -51,6 +53,17 @@ export class DiscountService {
         },
       };
     }
+  }
+
+  /**
+   * Check if discount has expired based on order count
+   */
+  private static isDiscountExpired(discount: Discount): boolean {
+    const orderCount = orders.size;
+    // Discount expires when order count reaches the next multiple of N
+    // If generated at order 5, it expires when order count reaches 10 (next multiple of 5)
+    const nextMultipleOfN = Math.ceil((discount.generatedAtOrder + 1) / this.N) * this.N;
+    return orderCount >= nextMultipleOfN;
   }
 
   /**
@@ -76,6 +89,17 @@ export class DiscountService {
           error: {
             code: EC.INVALID_DISCOUNT_CODE,
             message: 'Invalid discount code',
+          },
+        };
+      }
+
+      // Check if discount has expired based on order count
+      if (this.isDiscountExpired(currentDiscount)) {
+        return {
+          success: false,
+          error: {
+            code: EC.DISCOUNT_ALREADY_USED,
+            message: 'Discount code has expired',
           },
         };
       }
@@ -130,7 +154,8 @@ export class DiscountService {
     ordersWithDiscount: number;
   }> {
     try {
-      const currentDiscount = getCurrentDiscount();
+      // Use service method to get current discount (checks expiration)
+      const currentDiscount = this.getCurrentDiscount();
       
       // Count total orders from orders Map
       const orderCount = orders.size;
@@ -173,10 +198,20 @@ export class DiscountService {
   }
 
   /**
-   * Get current discount (if exists and unused)
+   * Get current discount (if exists, unused, and not expired)
    */
   public static getCurrentDiscount(): Discount | null {
     const currentDiscount = getCurrentDiscount();
+    if (!currentDiscount) {
+      return null;
+    }
+    
+    // Check if discount has expired based on order count
+    if (this.isDiscountExpired(currentDiscount)) {
+      return null;
+    }
+    
+    // Return discount if it hasn't been used
     return currentDiscount && !currentDiscount.isUsed ? currentDiscount : null;
   }
 
@@ -185,6 +220,7 @@ export class DiscountService {
    */
   public static generateDiscountManually(): ApiResponse<Discount> {
     try {
+      const orderCount = orders.size;
       // Generate new discount code (replaces any existing discount)
       const code = this.generateDiscountCode();
       const now = new Date().toISOString();
@@ -194,6 +230,7 @@ export class DiscountService {
         percentage: 10,
         isUsed: false,
         createdAt: now,
+        generatedAtOrder: orderCount,
       };
 
       setCurrentDiscount(discount);

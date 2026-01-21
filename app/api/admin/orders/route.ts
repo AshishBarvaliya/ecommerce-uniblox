@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
       data: {
         orders: ordersArray,
         statistics: {
+          totalOrders: ordersArray.length,
           totalItemsPurchased,
           totalPurchaseAmount,
           discountCodesUsed: uniqueDiscountCodes,

@@ -106,7 +106,10 @@ export function CartSummary({ cart, total, onCheckout, onRemove, onUpdateQuantit
                           {onUpdateQuantity ? (
                             <div className="flex items-center gap-1.5 bg-white border border-gray-300 rounded-md p-0.5">
                               <button
-                                onClick={() => {
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
                                   if (item.quantity === 1) {
                                     onRemove(item.productId);
                                   } else {
@@ -122,7 +125,12 @@ export function CartSummary({ cart, total, onCheckout, onRemove, onUpdateQuantit
                                 {item.quantity}
                               </span>
                               <button
-                                onClick={() => onUpdateQuantity(item.productId, item.quantity + 1)}
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  onUpdateQuantity?.(item.productId, item.quantity + 1);
+                                }}
                                 className="w-6 h-6 flex items-center justify-center rounded bg-blue-50 hover:bg-blue-100 active:bg-blue-200 border border-blue-200 hover:border-blue-300 transition-all"
                                 title="Increase quantity"
                               >
@@ -136,7 +144,12 @@ export function CartSummary({ cart, total, onCheckout, onRemove, onUpdateQuantit
                         <p className="text-xs font-semibold text-primary mt-1">${itemTotal}</p>
                       </div>
                       <button
-                        onClick={() => onRemove(item.productId)}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onRemove(item.productId);
+                        }}
                         className="p-1 rounded hover:bg-red-100 transition-colors flex-shrink-0"
                         title="Remove item"
                       >

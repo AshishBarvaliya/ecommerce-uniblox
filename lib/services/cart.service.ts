@@ -128,15 +128,20 @@ export class CartService {
     productId: string
   ): ApiResponse<Cart> {
     try {
-      const cart = carts.get(userId);
+      // Get or create cart (like getCart does)
+      let cart = carts.get(userId);
       if (!cart) {
-        return {
-          success: false,
-          error: {
-            code: EC.CART_NOT_FOUND,
-            message: 'Cart not found',
-          },
+        const now = new Date().toISOString();
+        cart = {
+          id: `cart-${userId}`,
+          userId,
+          items: [],
+          total: 0,
+          itemCount: 0,
+          createdAt: now,
+          updatedAt: now,
         };
+        carts.set(userId, cart);
       }
 
       const itemIndex = cart.items.findIndex(
@@ -191,15 +196,20 @@ export class CartService {
         };
       }
 
-      const cart = carts.get(userId);
+      // Get or create cart (like getCart does)
+      let cart = carts.get(userId);
       if (!cart) {
-        return {
-          success: false,
-          error: {
-            code: EC.CART_NOT_FOUND,
-            message: 'Cart not found',
-          },
+        const now = new Date().toISOString();
+        cart = {
+          id: `cart-${userId}`,
+          userId,
+          items: [],
+          total: 0,
+          itemCount: 0,
+          createdAt: now,
+          updatedAt: now,
         };
+        carts.set(userId, cart);
       }
 
       const item = cart.items.find((item) => item.productId === productId);

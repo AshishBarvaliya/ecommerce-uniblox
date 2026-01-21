@@ -34,6 +34,7 @@ export interface Discount {
   isUsed: boolean;
   createdAt: string;
   usedAt?: string;
+  generatedAtOrder: number; // Order number when this discount was generated
 }
 
 // Checkout types
