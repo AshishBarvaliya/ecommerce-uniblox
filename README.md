@@ -69,6 +69,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 *Discount code successfully applied to order*
 
 ### 4. Admin Dashboard
+/admin (UI page route) - keep this route open in another tab to see live changes.
 ![Admin Dashboard](public/screenshots/admin_portal.png)
 *Admin panel for managing orders, statistics, and generating discount codes*
 
