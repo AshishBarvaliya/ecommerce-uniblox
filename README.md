@@ -57,19 +57,19 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 ## User Flow
 
 ### 1. Products & Cart
-![Products Cart](/screenshots/products_carts.png)
+![Products Cart](public/screenshots/products_carts.png)
 *Browse products and manage shopping cart*
 
 ### 2. Receive Discount Code
-![Discount Code](/screenshots/discount_code_generated.png)
+![Discount Code](public/screenshots/discount_code_generated.png)
 *View available discount codes*
 
 ### 3. Discount Applied Successfully
-![Discount Applied](/screenshots/discount_applied.png)
+![Discount Applied](public/screenshots/discount_applied.png)
 *Discount code successfully applied to order*
 
 ### 4. Admin Dashboard
-![Admin Dashboard](/screenshots/admin_portal.png)
+![Admin Dashboard](public/screenshots/admin_portal.png)
 *Admin panel for managing orders, statistics, and generating discount codes*
 
 ## Discount Code Generation
