@@ -42,7 +42,8 @@ export function ProductCard({ product, onAddToCart, isLoading }: ProductCardProp
         <Button
           onClick={() => onAddToCart(product.id)}
           disabled={isLoading}
-          className="w-full h-10 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 hover:from-blue-700 hover:via-blue-600 hover:to-blue-700 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed border-0"
+          variant="gradient"
+          className="w-full h-10 duration-300 hover:scale-[1.02] active:scale-[0.98] border-0"
           size="sm"
         >
           {isLoading ? (
