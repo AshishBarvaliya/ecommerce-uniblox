@@ -251,14 +251,14 @@ export class DiscountService {
   }
 
   /**
-   * Generate a random discount code
+   * Generate a discount code
    */
   private static generateDiscountCode(): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 8; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
+    const orderCount = orders.size;
+    const timestamp = Date.now();
+    // Generate deterministic code based on order count and timestamp
+    const base = `DISC${orderCount}${timestamp}`.slice(0, 8).toUpperCase();
+    // Pad to 8 characters if needed
+    return base.padEnd(8, '0');
   }
 }

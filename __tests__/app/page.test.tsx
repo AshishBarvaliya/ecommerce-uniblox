@@ -312,10 +312,10 @@ describe('Home Page', () => {
     });
   });
 
-  it('should handle checkout failure', async () => {
+  it('should handle checkout failure (empty cart)', async () => {
     mockCheckout.mockResolvedValue({
       success: false,
-      error: 'Payment processing failed',
+      error: 'Cart not found or empty',
     });
 
     (global.fetch as jest.Mock)
@@ -337,7 +337,7 @@ describe('Home Page', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Checkout Failed')).toBeInTheDocument();
-      expect(screen.getByText('Payment processing failed')).toBeInTheDocument();
+      expect(screen.getByText('Cart not found or empty')).toBeInTheDocument();
     });
   });
 

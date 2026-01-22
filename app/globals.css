@@ -23,6 +23,10 @@
   --radius: 0.5rem;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Tailwind v4 expects these without color- prefix for utilities */
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 100%;
 }
 
 * {
@@ -33,4 +37,17 @@ body {
   background-color: hsl(var(--color-background));
   color: hsl(var(--color-foreground));
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Explicit CSS rules for destructive color utilities - Tailwind v4 fallback */
+.bg-destructive {
+  background-color: hsl(var(--destructive));
+}
+
+.text-destructive-foreground {
+  color: hsl(var(--destructive-foreground));
+}
+
+.hover\:bg-destructive\/90:hover {
+  background-color: hsl(var(--destructive) / 0.9);
 }

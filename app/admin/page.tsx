@@ -331,7 +331,7 @@ export default function AdminPage() {
 
       {/* Result Modal */}
       <Dialog open={showResultModal.open} onOpenChange={(open) => setShowResultModal({ ...showResultModal, open })}>
-        <DialogContent>
+        <DialogContent className="bg-gray-50">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {showResultModal.type === 'success' ? (
@@ -356,7 +356,7 @@ export default function AdminPage() {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={() => setShowResultModal({ ...showResultModal, open: false })}>
+            <Button onClick={() => setShowResultModal({ ...showResultModal, open: false })} variant="outline">
               Close
             </Button>
           </DialogFooter>
@@ -365,7 +365,7 @@ export default function AdminPage() {
 
       {/* Reset Store Confirmation Modal */}
       <Dialog open={showResetModal} onOpenChange={setShowResetModal}>
-        <DialogContent>
+        <DialogContent className="bg-gray-50">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />

@@ -64,15 +64,16 @@ export default function Home() {
         const data = await response.json();
         if (data.success && data.data) {
           setCurrentDiscount(data.data);
+        } else {
+          setCurrentDiscount(null);
         }
       } catch (error) {
         console.error('Failed to fetch discount:', error);
+        setCurrentDiscount(null);
       }
     }
     fetchDiscount();
-    // Refresh discount after checkout
-    const interval = setInterval(fetchDiscount, 5000); // Check every 5 seconds
-    return () => clearInterval(interval);
+    // Note: Discount is also refreshed after checkout in handleCheckout
   }, []);
 
   const handleAddToCart = async (productId: string) => {
@@ -208,6 +209,7 @@ export default function Home() {
               onClick={() => setCheckoutModal({ ...checkoutModal, open: false })}
               className={checkoutModal.type === 'success' ? 'w-full bg-blue-600 hover:bg-blue-700 text-white' : ''}
               size="lg"
+              variant="outline"
             >
               {checkoutModal.type === 'success' ? 'Continue Shopping' : 'Close'}
             </Button>

@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ecommerce Application
+
+A modern ecommerce platform built with Next.js featuring product catalog, shopping cart, discount codes, and admin dashboard.
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **UI Library**: React 19
+- **Styling**: Tailwind CSS 4
+- **UI Components**: Shadcn / Radix UI
+- **Testing**: Jest, React Testing Library
+- **Icons**: Lucide React
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Run tests
+npm test
+
+# Build for production
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## API Routes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Products
+- `GET /api/products` - Get all products
+- `GET /api/products/[id]` - Get product by ID
 
-## Learn More
+### Cart
+- `GET /api/cart?userId=xxx` - Get user's cart
+- `POST /api/cart` - Add item to cart
+- `PATCH /api/cart/update` - Update cart item quantity
+- `DELETE /api/cart/remove` - Remove item from cart
 
-To learn more about Next.js, take a look at the following resources:
+### Checkout
+- `POST /api/checkout` - Process checkout with payment method and optional discount code
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Discount
+- `GET /api/discount` - Get current active discount code
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Admin
+- `GET /api/admin/orders` - Get all orders with statistics
+- `GET /api/admin/stats` - Get discount statistics
+- `POST /api/admin/discount/generate` - Manually generate discount code
+- `POST /api/admin/reset` - Reset store (orders, carts, discounts)
 
-## Deploy on Vercel
+## User Flow
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 1. Products & Cart
+![Products Cart](/screenshots/products_carts.png)
+*Browse products and manage shopping cart*
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 2. Receive Discount Code
+![Discount Code](/screenshots/discount_code_generated.png)
+*View available discount codes*
+
+### 3. Discount Applied Successfully
+![Discount Applied](/screenshots/discount_applied.png)
+*Discount code successfully applied to order*
+
+### 4. Admin Dashboard
+![Admin Dashboard](/screenshots/admin_portal.png)
+*Admin panel for managing orders, statistics, and generating discount codes*
+
+## Discount Code Generation
+
+**Constant N = 5**
+
+A discount code is automatically generated every **5 orders**. The discount code:
+- Provides a 10% discount
+- Expires when the order count reaches the next multiple of N

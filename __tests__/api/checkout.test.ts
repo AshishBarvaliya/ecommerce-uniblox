@@ -129,7 +129,7 @@ describe('/api/checkout', () => {
       expect(data.success).toBe(false);
     });
 
-    it('should handle checkout failures', async () => {
+    it('should handle checkout failures (empty cart)', async () => {
       const { parseJsonBody } = require('@/lib/api/utils');
       parseJsonBody.mockResolvedValue({
         success: true,
@@ -142,8 +142,8 @@ describe('/api/checkout', () => {
       (CheckoutService.processCheckout as jest.Mock).mockResolvedValue({
         success: false,
         error: {
-          code: 'CHECKOUT_FAILED',
-          message: 'Payment processing failed',
+          code: 'CART_NOT_FOUND',
+          message: 'Cart not found or empty',
         },
       });
 
@@ -158,7 +158,7 @@ describe('/api/checkout', () => {
       const data = await response.json();
 
       expect(data.success).toBe(false);
-      expect(data.error.code).toBe('CHECKOUT_FAILED');
+      expect(data.error.code).toBe('CART_NOT_FOUND');
     });
 
     it('should handle exceptions', async () => {
